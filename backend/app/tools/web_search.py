@@ -1,7 +1,6 @@
-"""Public web search + page retrieval. No API key required (DuckDuckGo HTML endpoint).
+"""Public web search + page retrieval via Tavily API with DuckDuckGo fallback.
 
-Only publicly accessible content is retrieved, and the real source URL is always
-preserved so the Analysis and Verification agents can cite it.
+Preserves real source URLs and clean snippets for Analysis and Verification agents.
 """
 
 from __future__ import annotations
@@ -38,11 +37,63 @@ class SearchHit:
     text: str = ""
 
 
+# --------------------------------------------------------------------------
+# Tavily Integration
+# --------------------------------------------------------------------------
+
+async def _search_tavily(query: str, limit: int, api_key: str) -> list[SearchHit]:
+    """Search using the official Tavily API endpoint via HTTPX."""
+    settings = get_settings()
+    url = "https://api.tavily.com/search"
+    payload = {
+        "api_key": api_key,
+        "query": query,
+        "max_results": limit,
+        "search_depth": "basic",
+        "include_answer": False,
+        "include_raw_content": False,
+    }
+
+    async with httpx.AsyncClient(timeout=settings.web_fetch_timeout_seconds) as client:
+        resp = await client.post(url, json=payload)
+        resp.raise_for_status()
+        data = resp.json()
+
+    hits: list[SearchHit] = []
+    for item in data.get("results", []):
+        raw_text = item.get("content", "") or item.get("raw_content", "") or ""
+        hits.append(
+            SearchHit(
+                title=item.get("title", item.get("url", "Untitled")),
+                url=item.get("url", ""),
+                snippet=item.get("content", "")[:300],
+                text=raw_text[: settings.web_max_chars_per_page],
+            )
+        )
+    return hits
+
+
+# --------------------------------------------------------------------------
+# DuckDuckGo Fallback Integration
+# --------------------------------------------------------------------------
+
 async def search(query: str, limit: int | None = None) -> list[SearchHit]:
+    """Search Tavily if API key is present, otherwise fallback to DuckDuckGo."""
     settings = get_settings()
     limit = limit or settings.web_search_results
-    last_error: Exception | None = None
 
+    # 1. Try Tavily first
+    if settings.tavily_api_key.strip():
+        try:
+            hits = await _search_tavily(query, limit, settings.tavily_api_key.strip())
+            if hits:
+                logger.info("Tavily search succeeded for query '%s' (%d hits)", query, len(hits))
+                return hits
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("Tavily search failed for '%s': %s. Falling back to DuckDuckGo.", query, exc)
+
+    # 2. Fallback to DuckDuckGo HTML scraper
+    last_error: Exception | None = None
     for endpoint in _SEARCH_ENDPOINTS:
         try:
             async with httpx.AsyncClient(
@@ -55,7 +106,7 @@ async def search(query: str, limit: int | None = None) -> list[SearchHit]:
                 hits = _parse_results(resp.text, limit)
                 if hits:
                     return hits
-        except Exception as exc:  # noqa: BLE001 - try the next endpoint
+        except Exception as exc:  # noqa: BLE001
             last_error = exc
             logger.warning("Search endpoint %s failed: %s", endpoint, exc)
 
@@ -126,7 +177,7 @@ async def fetch_page(url: str) -> str:
             if "html" not in content_type and "text" not in content_type:
                 return ""
             return _html_to_text(resp.text)[: settings.web_max_chars_per_page]
-    except Exception as exc:  # noqa: BLE001 - unavailable pages are skipped, not fatal
+    except Exception as exc:  # noqa: BLE001
         logger.info("Skipping %s (%s)", url, exc)
         return ""
 
@@ -140,11 +191,20 @@ def _html_to_text(html: str) -> str:
 
 
 async def research(query: str, limit: int | None = None) -> list[SearchHit]:
-    """Search then fetch each result's text in parallel."""
+    """Search then ensure each result has full text populated."""
     hits = await search(query, limit)
     if not hits:
         return []
-    texts = await asyncio.gather(*(fetch_page(h.url) for h in hits))
-    for hit, text in zip(hits, texts):
-        hit.text = text or hit.snippet
+
+    # If Tavily already fetched text, skip individual page scraping passes
+    unfetched = [h for h in hits if not h.text]
+    if unfetched:
+        texts = await asyncio.gather(*(fetch_page(h.url) for h in unfetched))
+        for hit, text in zip(unfetched, texts):
+            hit.text = text or hit.snippet
+
+    for h in hits:
+        if not h.text:
+            h.text = h.snippet
+
     return [h for h in hits if h.text]

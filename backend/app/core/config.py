@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     gemini_timeout_seconds: float = 120.0
 
     # --- Web research ---
+    tavily_api_key: str = ""  # <-- Tavily API key added here
     web_search_results: int = 5
     web_fetch_timeout_seconds: float = 15.0
     web_max_chars_per_page: int = 6000
