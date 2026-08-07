@@ -1,64 +1,29 @@
-# AgentFlow
+# CodeRush 2.0 | Init Project Repository
 
-Dynamic agentic workflow system. You give a natural-language objective; AgentFlow
-understands the task, plans subtasks, selects reusable capabilities, generates a
-workflow graph, examines it, executes it live, verifies the result and returns it.
+## Project Information
 
-```
-User Input → Task Understanding → Task Planning → Capability Selection →
-Workflow Generation → Workflow Examination → Execution → Verification → Final Result
-```
+* Team Name: Init
+* Project Title: Unified Agent Form Orchestrator
+* Track/Theme: Agent Ecosystem
 
-Workflows are **not** hardcoded: the same four reusable agents are selected per
-request, so different objectives produce different graphs.
+## Project Description
 
-## Capabilities
+Provide a concise overview of the problem you are solving and your proposed solution.
 
-| id | Agent | Role |
-| --- | --- | --- |
-| `document` | Document Agent | Reads uploaded PDF / DOCX / TXT files |
-| `web_research` | Web Research Agent | Retrieves public web content and preserves source URLs |
-| `analysis` | Analysis Agent | Reasoning, comparison, summarization, synthesis |
-| `verification` | Verification Agent | Completeness, consistency and source support |
+## Technical Stack
 
-## Layout
+List the technologies used in this project:
 
-```
-backend/app/{api,core,schemas,orchestration,agents,tools,services}   FastAPI + Gemini
-backend/tests                                                        offline pipeline tests
-src/{components,routes,services,types}                               React + TypeScript frontend
-docs/{architecture,api-contracts,demo-flows}.md
-```
+* Frontend: (e.g., React, Next.js, Tailwind)
+* Backend: (e.g., Node.js, FastAPI, Go)
+* Database: (e.g., PostgreSQL, MongoDB, Supabase)
+* Tools/APIs: (e.g., Clerk, Stripe, Gemini API)
 
-The frontend lives in this repo's Vite root (`src/`) with the prescribed
-`components / services / types` split; `src/routes/index.tsx` is the app page.
+## Setup and Installation
 
-## Run the backend
+Provide instructions on how to run your project locally:
 
-```bash
-cd backend
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-cp ../.env.example .env      # then set GEMINI_API_KEY
-uvicorn app.main:app --reload --port 8000
-```
-
-Get a Gemini key at https://aistudio.google.com/apikey. The key is read from the
-`GEMINI_API_KEY` environment variable only — never hardcoded.
-
-Tests: `cd backend && pytest` (fully offline, stubbed LLM).
-
-## Run the frontend
-
-```bash
-echo "VITE_AGENTFLOW_API_URL=http://localhost:8000" > .env
-bun install && bun run dev
-```
-
-If the backend is unreachable or the key is missing, the UI shows an explicit
-configuration/error state instead of fabricating a result.
-
-## Demos
-
-See `docs/demo-flows.md` for the three demo objectives and the workflow shapes
-they produce.
+1. Clone the repository.
+2. Install dependencies: `npm install` or `pip install -r requirements.txt`
+3. Configure environment variables (provide a `.env.example` if necessary).
+4. Start the development server: `npm run dev` or `python main.py`
