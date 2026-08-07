@@ -7,6 +7,7 @@ from app.agents.base import BaseAgent
 from app.agents.document_agent import DocumentAgent
 from app.agents.verification_agent import VerificationAgent
 from app.agents.web_research_agent import WebResearchAgent
+from app.agents.summarizer_agent import SummarizerAgent
 from app.schemas.workflow import Capability
 from app.services.gemini_service import GeminiService, get_gemini_service
 
@@ -15,6 +16,7 @@ AGENT_CLASSES: dict[Capability, type[BaseAgent]] = {
     Capability.WEB_RESEARCH: WebResearchAgent,
     Capability.ANALYSIS: AnalysisAgent,
     Capability.VERIFICATION: VerificationAgent,
+    Capability.SUMMARIZE: SummarizerAgent,
 }
 
 

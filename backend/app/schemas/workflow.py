@@ -15,6 +15,7 @@ class Capability(str, Enum):
     WEB_RESEARCH = "web_research"
     ANALYSIS = "analysis"
     VERIFICATION = "verification"
+    SUMMARIZE = "summarize"
 
 
 class NodeStatus(str, Enum):
@@ -53,6 +54,7 @@ class SubTask(BaseModel):
 
 class TaskPlan(BaseModel):
     understanding: TaskUnderstanding
+    verbosity: Literal["concise", "standard", "comprehensive"] = "standard"
     subtasks: list[SubTask]
     rationale: str = ""
 
@@ -81,6 +83,7 @@ class WorkflowEdge(BaseModel):
 class Workflow(BaseModel):
     id: str
     objective: str
+    verbosity: Literal["concise", "standard", "comprehensive"] = "standard"
     nodes: list[WorkflowNode]
     edges: list[WorkflowEdge]
     understanding: TaskUnderstanding

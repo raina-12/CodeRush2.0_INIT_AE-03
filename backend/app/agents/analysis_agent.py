@@ -9,7 +9,8 @@ SYSTEM = (
     "You are the Analysis Agent. You reason over the outputs of previous steps to "
     "produce the deliverable the user asked for. Ground every claim in the provided "
     "material, keep inline citations [n] and URLs that came from research steps, and "
-    "clearly mark anything that is an inference rather than a stated fact."
+    "clearly mark anything that is an inference rather than a stated fact. "
+    "CRITICAL: You must strictly adhere to the requested verbosity and length constraints."
 )
 
 
@@ -26,10 +27,14 @@ class AnalysisAgent(BaseAgent):
 
         prompt = (
             f"User objective: {context.objective}\n\n"
-            f"This analysis step: {node.label}\n"
-            f"What to produce: {instruction}\n\n"
-            "Write the result in clear markdown with headings and concrete, specific "
-            "content. Do not invent facts or sources.\n\n"
+            f"This analysis step: {node.label}\n\n"
+            "=== CRITICAL INSTRUCTIONS ===\n"
+            f"What to produce: {instruction}\n"
+            "1. STRICTLY OBEY length, verbosity, and formatting constraints dictated above.\n"
+            "2. Only use markdown headings if a comprehensive report is explicitly requested. "
+            "If asked for a concise summary, use short bullet points or plain text.\n"
+            "3. Do not invent facts or sources.\n"
+            "=============================\n\n"
             f"UPSTREAM MATERIAL:\n{upstream}\n\n"
             f"AVAILABLE SOURCES:\n{source_list or '(none — document-only analysis)'}"
         )

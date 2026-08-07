@@ -34,6 +34,7 @@ def generate_workflow(plan: TaskPlan) -> Workflow:
     return Workflow(
         id=str(uuid.uuid4()),
         objective=plan.understanding.objective,
+        verbosity=plan.verbosity, # <-- ADD THIS LINE
         nodes=nodes,
         edges=edges,
         understanding=plan.understanding,

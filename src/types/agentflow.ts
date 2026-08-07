@@ -1,4 +1,4 @@
-export type Capability = "document" | "web_research" | "analysis" | "verification";
+export type Capability = "document" | "web_research" | "analysis" | "verification" | "summarize";
 
 export type NodeStatus = "pending" | "running" | "completed" | "failed" | "skipped";
 
@@ -136,5 +136,10 @@ export const CAPABILITY_META: Record<
     label: "Verification Agent",
     short: "VER",
     hint: "Completeness, consistency, source support",
+  },
+  summarize: {
+    label: "Summarizer Agent",
+    short: "SUM",
+    hint: "Creates a highly concise executive summary",
   },
 };

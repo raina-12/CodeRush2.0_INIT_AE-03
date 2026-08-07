@@ -35,24 +35,27 @@ Rules:
   Split independent research angles into PARALLEL web_research subtasks (no
   dependency between them) when that genuinely helps; each needs its own queries.
 - Use "analysis" to reason over, compare or synthesize earlier outputs.
-- End with exactly one "verification" subtask that depends on the final analysis.
-- Produce between 2 and 7 subtasks. Do not add steps that add no value.
+- Add exactly one subtask to create an executive summary. Its capability MUST strictly be "summarize" (do not use "analysis").
+- End with exactly one "verification" subtask that depends on the summarize subtask.
+- End with exactly one "verification" subtask that depends on the summarize subtask.
+- Produce between 3 and 8 subtasks. Do not add steps that add no value.
 - depends_on must reference earlier subtask ids only; the graph must be acyclic.
-
+- ASSESS COMPLEXITY: Evaluate the objective and assign a "verbosity" level: "concise" (simple questions), "standard" (normal summaries), or "comprehensive" (deep research/reports).
 Return ONLY JSON:
 {{
   "rationale": "one or two sentences on why this shape of workflow",
+  "verbosity": "concise|standard|comprehensive",
   "subtasks": [
     {{
       "id": "s1",
       "title": "short imperative title",
       "description": "what this step must produce",
-      "capability": "document|web_research|analysis|verification",
+      "capability": "document|web_research|analysis|summarize|verification",
       "depends_on": [],
       "parameters": {{
         "queries": ["only for web_research"],
         "focus": "only for document",
-        "instruction": "only for analysis"
+        "instruction": "only for analysis or summarize"
       }}
     }}
   ]
@@ -92,6 +95,10 @@ class PlannerStage:
             if not isinstance(raw, dict):
                 continue
             capability = _capability(raw.get("capability"))
+            title_str = str(raw.get("title") or "").lower()
+            if capability is Capability.ANALYSIS and "summar" in title_str:
+                capability = Capability.SUMMARIZE
+            # ------------------------------
             if capability is None:
                 continue
             if capability is Capability.DOCUMENT and not document_names:
@@ -115,8 +122,13 @@ class PlannerStage:
             )
             known.add(node_id)
 
+        verbosity_val = str(payload.get("verbosity") or "standard").strip().lower()
+        if verbosity_val not in ("concise", "standard", "comprehensive"):
+            verbosity_val = "standard"
+
         return TaskPlan(
             understanding=understanding,
+            verbosity=verbosity_val, # <-- ADD THIS LINE
             subtasks=subtasks,
             rationale=str(payload.get("rationale") or ""),
         )

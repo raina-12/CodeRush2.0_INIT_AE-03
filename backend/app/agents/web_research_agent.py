@@ -14,7 +14,6 @@ SYSTEM = (
     "not answer part of the question, state that explicitly."
 )
 
-
 class WebResearchAgent(BaseAgent):
     capability = Capability.WEB_RESEARCH
     name = "Web Research Agent"
@@ -40,11 +39,14 @@ class WebResearchAgent(BaseAgent):
             except WebResearchError as exc:
                 errors.append(str(exc))
 
+        # FIX: Graceful fallback instead of crashing the DAG
         if not hits:
             detail = " ".join(errors) or "No public pages could be retrieved."
-            raise WebResearchError(
-                f"Web research for '{', '.join(map(str, queries))}' returned no usable "
-                f"content. {detail}"
+            fallback_message = f"*(Note: Web research returned no usable content. {detail})*"
+            return AgentOutput(
+                content=fallback_message,
+                summary="0 sources retrieved (Search failed or timed out).",
+                sources=[]
             )
 
         corpus = "\n\n".join(
