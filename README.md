@@ -11,14 +11,12 @@ Orqestra Web Application is a full-stack web application designed to configure, 
 LLM Configuration: Allows users to configure commercial models (e.g., Gemini gemini-2.5-flash) or local LLM backends with custom tuning and document/search parameters. <br>Goal-Driven Network Generation: Automatically creates a typed network of specialized AI agents based on a plain-language goal description.<br>
 Visual Execution Graph: Uses react to render an interactive node graph, enabling users to visually trace sequential or parallel agent execution in real time. <br> Governance & Controls: Enforces active execution constraints—including visible state updates, resource budget limits, tool/action permissions, and verification loops—to ensure output accuracy and control.
 ## Technical Stack
-List the technologies used in this project:<br>
-* Frontend: (e.g., React, Next.js, Tailwind)<br>
-* Backend: (e.g., Node.js, FastAPI, Go)<br>
-* Database: (e.g., PostgreSQL, MongoDB, Supabase)<br>
-* Tools/APIs: (e.g., Clerk, Stripe, Gemini API)
+Frontend: React 19, TypeScript, TanStack Start, TanStack Router, @xyflow/react, Tailwind CSS, Bun <br> 
+Backend: FastAPI, Python  <br> 
+Database: In-Memory State & Runtime, MongoDB <br> 
+ContextTools/APIs: Google Gemini API (gemini-2.5-flash), Vite, Bun 
 ## Setup and Installation
-Provide instructions on how to run your project locally:<br>
 1. Clone the repository.<br>
-2. Install dependencies: `npm install` or `pip install -r requirements.txt`<br>
-3. Configure environment variables (provide a `.env.example` if necessary).<br>
-4. Start the development server: `npm run dev` or `python main.py`
+2. Install dependencies: for backend: `cd backend`, `pip install -r requirements.txt` and for frontend: `bun install` <br>
+3. Configure environment variables: `.env.example` .<br>
+4. Start the development server: `bun run dev`, `uvicorn app.main:app --reload --port 8000`
