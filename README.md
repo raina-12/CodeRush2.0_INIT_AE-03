@@ -11,7 +11,7 @@ Orqestra Web Application is a full-stack web application designed to configure, 
 LLM Configuration: Allows users to configure commercial models (e.g., Gemini gemini-2.5-flash) or local LLM backends with custom tuning and document/search parameters. <br>Goal-Driven Network Generation: Automatically creates a typed network of specialized AI agents based on a plain-language goal description.<br>
 Visual Execution Graph: Uses react to render an interactive node graph, enabling users to visually trace sequential or parallel agent execution in real time. <br> Governance & Controls: Enforces active execution constraints—including visible state updates, resource budget limits, tool/action permissions, and verification loops—to ensure output accuracy and control.
 ## Technical Stack
-Frontend: React 19, TypeScript, TanStack Start, TanStack Router, @xyflow/react, Tailwind CSS, Bun <br> 
+Frontend: React 19, TypeScript, TanStack Start, TanStack Router, react, Tailwind CSS, Bun <br> 
 Backend: FastAPI, Python  <br> 
 Database: In-Memory State & Runtime, MongoDB <br> 
 ContextTools/APIs: Google Gemini API (gemini-2.5-flash), Vite, Bun 
