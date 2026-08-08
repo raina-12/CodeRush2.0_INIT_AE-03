@@ -1,5 +1,6 @@
 """MongoDB connection management using the async Motor driver."""
 
+import certifi
 from motor.motor_asyncio import AsyncIOMotorClient
 from app.core.config import get_settings
 from app.core.logging import get_logger
@@ -15,7 +16,11 @@ class DatabaseManager:
         """Initialize the async MongoDB connection."""
         settings = get_settings()
         try:
-            cls.client = AsyncIOMotorClient(settings.mongodb_uri)
+            # Added tlsCAFile=certifi.where() to fix the Windows SSL handshake error
+            cls.client = AsyncIOMotorClient(
+                settings.mongodb_uri, 
+                tlsCAFile=certifi.where()
+            )
             cls.db = cls.client[settings.mongodb_db_name]
             logger.info("Successfully connected to MongoDB.")
         except Exception as exc:
