@@ -27,6 +27,10 @@ class Settings(BaseSettings):
     # --- Server ---
     cors_origins: str = "*"
 
+    # --- Database ---
+    mongodb_uri: str = "mongodb+srv://meghamanojramachandran19_db_user:tZXrHU0g2M9BLqcl@cluster0.zbnxvtt.mongodb.net/?retryWrites=true&w=majority"
+    mongodb_db_name: str = "agentflow"
+
     @property
     def gemini_configured(self) -> bool:
         return bool(self.gemini_api_key.strip())

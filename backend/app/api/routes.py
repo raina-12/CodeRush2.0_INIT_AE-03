@@ -12,6 +12,7 @@ from app.agents.registry import capability_catalog
 from app.core.config import get_settings
 from app.core.errors import AgentFlowError
 from app.core.logging import get_logger
+from app.db import repository  # <-- Imported MongoDB repository
 from app.orchestration.orchestrator import Orchestrator
 from app.schemas.workflow import DocumentInfo, HealthResponse, RunRequest
 from app.services.document_store import get_document_store
@@ -52,6 +53,16 @@ async def upload_document(file: UploadFile = File(...)) -> DocumentInfo:
         content_type=file.content_type or "application/octet-stream",
         text=text,
     )
+    
+    # --- Save metadata to MongoDB ---
+    await repository.save_document(
+        doc_id=doc.document_id,
+        filename=doc.filename,
+        content_type=doc.content_type,
+        size_bytes=len(data),
+        chars=len(doc.text)
+    )
+
     return DocumentInfo(
         document_id=doc.document_id,
         filename=doc.filename,
@@ -59,6 +70,15 @@ async def upload_document(file: UploadFile = File(...)) -> DocumentInfo:
         characters=len(doc.text),
         preview=doc.text[:400],
     )
+
+
+@router.get("/runs/{run_id}")
+async def get_run_history(run_id: str):
+    """Fetch a specific agent run (used for shareable read-only links)."""
+    run = await repository.get_run(run_id)
+    if not run:
+        raise HTTPException(status_code=404, detail="Run not found")
+    return run
 
 
 @router.post("/runs/stream")
